@@ -38,6 +38,16 @@ jobs:
           p.write_text(s)
           PY
 
+      - name: Upload relevant source diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: LuminaTV-source-diagnostics
+          path: |
+            LuminaSolTV/app/src/main/java/com/lumina/soltv/api/*.kt
+            LuminaSolTV/app/src/main/java/com/lumina/soltv/data/*.kt
+            LuminaSolTV/app/src/main/java/com/lumina/soltv/model/*.kt
+          if-no-files-found: warn
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
