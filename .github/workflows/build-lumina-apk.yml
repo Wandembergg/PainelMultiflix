@@ -1,16 +1,12 @@
 name: Build LuminaSolTV APK
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 env:
   GRADLE_VERSION: '8.10.2'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,63 +14,46 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Reconstruct and patch project
         shell: bash
         run: |
           cat lumina_parts/00.b64 lumina_parts/01.b64 lumina_parts/02.b64 lumina_parts/03.b64 lumina_parts/04.b64 | base64 -d > LuminaSolTV_AndroidStudio_Project.zip
           unzip -q LuminaSolTV_AndroidStudio_Project.zip
-          test -f LuminaSolTV/settings.gradle.kts
           cp patches/BootstrapActivity.kt LuminaSolTV/app/src/main/java/com/lumina/soltv/ui/BootstrapActivity.kt
           cp patches/activity_bootstrap.xml LuminaSolTV/app/src/main/res/layout/activity_bootstrap.xml
+          cp patches/PanelApi.kt LuminaSolTV/app/src/main/java/com/lumina/soltv/api/PanelApi.kt
+          cp patches/M3uParser.kt LuminaSolTV/app/src/main/java/com/lumina/soltv/data/M3uParser.kt
           python3 - <<'PY'
           from pathlib import Path
           p=Path('LuminaSolTV/app/build.gradle.kts')
-          s=p.read_text().replace('versionCode = 1','versionCode = 2').replace('versionName = "1.0.0"','versionName = "1.1.0"')
+          s=p.read_text().replace('versionCode = 1','versionCode = 3').replace('versionName = "1.0.0"','versionName = "1.2.0"')
           needle='    buildFeatures { viewBinding = true }'
           insert='''    compileOptions {\n        sourceCompatibility = JavaVersion.VERSION_17\n        targetCompatibility = JavaVersion.VERSION_17\n    }\n\n    kotlinOptions {\n        jvmTarget = "17"\n    }\n\n    buildFeatures { viewBinding = true }'''
-          if 'sourceCompatibility = JavaVersion.VERSION_17' not in s:
-              s=s.replace(needle, insert)
+          if 'sourceCompatibility = JavaVersion.VERSION_17' not in s: s=s.replace(needle, insert)
           p.write_text(s)
           PY
-
-      - name: Upload relevant source diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: LuminaTV-source-diagnostics
-          path: |
-            LuminaSolTV/app/src/main/java/com/lumina/soltv/api/*.kt
-            LuminaSolTV/app/src/main/java/com/lumina/soltv/data/*.kt
-            LuminaSolTV/app/src/main/java/com/lumina/soltv/model/*.kt
-          if-no-files-found: warn
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
-
       - name: Build debug APK
         working-directory: LuminaSolTV
         run: gradle --no-daemon assembleDebug --stacktrace
-
       - name: Verify APK
         shell: bash
         run: |
           APK=$(find LuminaSolTV/app/build/outputs/apk/debug -name '*.apk' -type f | head -1)
           test -n "$APK"
           unzip -t "$APK" >/dev/null
-          ls -lh "$APK"
           sha256sum "$APK"
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: LuminaTV-1.1.0-functional
+          name: LuminaTV-1.2.0-playlist-fix
           path: LuminaSolTV/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
