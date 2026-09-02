@@ -1,0 +1,57 @@
+name: Build LuminaSolTV APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GRADLE_VERSION: '8.10.2'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Reconstruct Android project
+        shell: bash
+        run: |
+          cat lumina_parts/00.b64 lumina_parts/01.b64 lumina_parts/02.b64 lumina_parts/03.b64 lumina_parts/04.b64 | base64 -d > LuminaSolTV_AndroidStudio_Project.zip
+          unzip -q LuminaSolTV_AndroidStudio_Project.zip
+          test -f LuminaSolTV/settings.gradle.kts
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: ${{ env.GRADLE_VERSION }}
+
+      - name: Build debug APK
+        working-directory: LuminaSolTV
+        run: gradle --no-daemon assembleDebug --stacktrace
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          APK=$(find LuminaSolTV/app/build/outputs/apk/debug -name '*.apk' -type f | head -1)
+          test -n "$APK"
+          ls -lh "$APK"
+          sha256sum "$APK"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: LuminaTV-debug-apk
+          path: LuminaSolTV/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
