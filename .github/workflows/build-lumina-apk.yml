@@ -19,12 +19,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Reconstruct Android project
+      - name: Reconstruct and normalize Android project
         shell: bash
         run: |
           cat lumina_parts/00.b64 lumina_parts/01.b64 lumina_parts/02.b64 lumina_parts/03.b64 lumina_parts/04.b64 | base64 -d > LuminaSolTV_AndroidStudio_Project.zip
           unzip -q LuminaSolTV_AndroidStudio_Project.zip
           test -f LuminaSolTV/settings.gradle.kts
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('LuminaSolTV/app/build.gradle.kts')
+          s=p.read_text()
+          needle='    buildFeatures { viewBinding = true }'
+          insert='''    compileOptions {\n        sourceCompatibility = JavaVersion.VERSION_17\n        targetCompatibility = JavaVersion.VERSION_17\n    }\n\n    kotlinOptions {\n        jvmTarget = "17"\n    }\n\n    buildFeatures { viewBinding = true }'''
+          if 'sourceCompatibility = JavaVersion.VERSION_17' not in s:
+              s=s.replace(needle, insert)
+          p.write_text(s)
+          PY
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
