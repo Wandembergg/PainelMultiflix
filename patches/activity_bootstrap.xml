@@ -1,0 +1,15 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:background="@color/bg" android:padding="32dp">
+    <ImageView android:layout_width="96dp" android:layout_height="96dp" android:src="@drawable/ic_tv" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Lumina TV" android:textSize="30sp" android:textStyle="bold" android:textColor="@color/text" android:layout_marginTop="16dp" />
+    <ProgressBar android:id="@+id/progress" android:layout_width="48dp" android:layout_height="48dp" android:layout_marginTop="24dp" />
+    <TextView android:id="@+id/status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center" android:text="Conectando ao painel..." android:textSize="16sp" android:textColor="@color/text" android:layout_marginTop="16dp" />
+    <LinearLayout android:id="@+id/activationBox" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:visibility="gone" android:layout_marginTop="18dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ATIVAÇÃO DO DISPOSITIVO" android:textStyle="bold" android:textSize="18sp" android:textColor="@color/text" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Use este MAC/ID no painel:" android:textColor="#BBBBBB" android:layout_marginTop="10dp" />
+        <TextView android:id="@+id/activationCode" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="28sp" android:textStyle="bold" android:textIsSelectable="true" android:textColor="@color/text" android:layout_marginTop="4dp" />
+        <TextView android:id="@+id/deviceKey" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#BBBBBB" android:layout_marginTop="6dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Verificação automática a cada 10 segundos." android:textColor="#999999" android:layout_marginTop="8dp" />
+    </LinearLayout>
+    <TextView android:id="@+id/deviceId" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#AAAAAA" android:layout_marginTop="12dp" />
+    <Button android:id="@+id/retry" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Verificar ativação" android:visibility="gone" android:focusable="true" android:layout_marginTop="20dp" />
+</LinearLayout>
