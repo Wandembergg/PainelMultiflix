@@ -65,9 +65,9 @@ class BootstrapActivity : ComponentActivity() {
                     delay(10_000)
                     runCatching { repo.bootstrap() }.onSuccess { (auth, playlist) ->
                         if (auth.portals.isNotEmpty() && playlist.channels.isNotEmpty()) {
+                            watchJob?.cancel()
                             startActivity(Intent(this@BootstrapActivity, MainActivity::class.java))
                             finish()
-                            cancel()
                         }
                     }
                 }
